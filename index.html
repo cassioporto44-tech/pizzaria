@@ -99,6 +99,7 @@ background:#ddd;
 border:none;
 padding:5px 10px;
 cursor:pointer;
+margin-left:5px;
 }
 
 .total{
@@ -162,6 +163,22 @@ margin-top:10px;
 width:100%;
 border-radius:6px;
 cursor:pointer;
+}
+
+/* CARRINHO FLUTUANTE */
+
+.cart-float{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#ff0000;
+color:white;
+padding:15px;
+border-radius:50px;
+font-weight:bold;
+box-shadow:0 5px 10px rgba(0,0,0,0.3);
+cursor:pointer;
+transition:0.2s;
 }
 
 footer{
@@ -245,8 +262,14 @@ Total: R$ <span id="total">0.00</span>
 
 <button class="copy-btn" onclick="copiarPix()">Copiar PIX</button>
 
+<button class="copy-btn" onclick="fecharPix()">Fechar</button>
+
 </div>
 
+</div>
+
+<div class="cart-float" onclick="scrollCarrinho()">
+🛒 <span id="qtdCart">0</span>
 </div>
 
 <footer>
@@ -268,6 +291,7 @@ item.qtd++;
 cart.push({nome,preco,qtd:1});
 }
 
+animacaoAdd();
 render();
 
 }
@@ -276,6 +300,7 @@ function render(){
 
 let html="";
 let total=0;
+let qtdTotal=0;
 
 cart.forEach((item,index)=>{
 
@@ -290,25 +315,27 @@ ${item.nome} (${item.qtd})
 
 <button class="qtd-btn" onclick="mais(${index})">+</button>
 
+<button class="qtd-btn" onclick="remover(${index})">🗑</button>
+
 </div>
 
 </div>
 `;
 
 total+=item.preco*item.qtd;
+qtdTotal+=item.qtd;
 
 });
 
 document.getElementById("cart").innerHTML=html;
 document.getElementById("total").innerText=total.toFixed(2);
+document.getElementById("qtdCart").innerText=qtdTotal;
 
 }
 
 function mais(i){
-
 cart[i].qtd++;
 render();
-
 }
 
 function menos(i){
@@ -316,12 +343,35 @@ function menos(i){
 cart[i].qtd--;
 
 if(cart[i].qtd<=0){
-
 cart.splice(i,1);
-
 }
 
 render();
+
+}
+
+function remover(i){
+cart.splice(i,1);
+render();
+}
+
+function animacaoAdd(){
+
+let icon=document.querySelector(".cart-float");
+
+icon.style.transform="scale(1.3)";
+
+setTimeout(()=>{
+icon.style.transform="scale(1)";
+},200);
+
+}
+
+function scrollCarrinho(){
+
+document.querySelector(".cart").scrollIntoView({
+behavior:"smooth"
+});
 
 }
 
@@ -350,7 +400,15 @@ pix.select();
 
 document.execCommand("copy");
 
+alert("PIX copiado!");
+
 enviarPedido();
+
+}
+
+function fecharPix(){
+
+document.getElementById("pixModal").style.display="none";
 
 }
 
@@ -381,6 +439,14 @@ let numero="5599984591017";
 let url=`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
 
 window.open(url,"_blank");
+
+cart=[];
+render();
+
+document.getElementById("nome").value="";
+document.getElementById("endereco").value="";
+
+document.getElementById("pixModal").style.display="none";
 
 }
 
